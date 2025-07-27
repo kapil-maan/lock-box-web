@@ -1,3 +1,6 @@
+// 
+
+
 // src/app/layout.tsx
 import * as React from 'react';
 import ThemeRegistry from '@/components/ThemeRegistry';

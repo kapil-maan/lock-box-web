@@ -20,7 +20,6 @@ export default function LoginPage() {
 
   const handleConfirm = () => {
     // For now, we will just navigate to the passwords list.
-    // In a future step, we will add real password checking.
     router.push('/passwords');
   };
 

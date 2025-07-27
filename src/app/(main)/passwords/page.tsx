@@ -2,35 +2,48 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Box, Container, Fab, List, ListItem, ListItemButton, ListItemText, Typography, TextField, InputAdornment, Dialog, DialogTitle, DialogContent, IconButton, Stack, DialogActions, Button } from '@mui/material';
+import { 
+    Box, Container, Fab, List, ListItem, ListItemButton, ListItemText, Typography, 
+    TextField, InputAdornment, Dialog, DialogTitle, DialogContent, IconButton, 
+    Stack, DialogActions, Button 
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useRouter } from 'next/navigation';
+import { usePasswords, PasswordEntry } from '@/contexts/PasswordContext';
 
-// Define the type for our password entries
-type PasswordEntry = {
-    id: string;
-    account: string;
-    username: string;
-    password?: string;
-    remarks?: string;
-};
+// Helper component to avoid repetition in the dialog
+interface DetailFieldProps {
+    label: string;
+    value: string;
+    onCopy: (text: string) => void;
+    isRemark?: boolean;
+}
 
-// Mock data with more details
-const mockPasswords: PasswordEntry[] = [
-    { id: '1', account: 'okpass', username: 'kapil', password: '1231', remarks: 'Main account for testing' },
-    { id: '2', account: 'newway', username: 'kapil', password: 'password123', remarks: '' },
-    { id: '3', account: 'Hi Kapil Hacker', username: 'your account has been hacked', password: 'hacked_password', remarks: 'This is a test entry with a long name.' },
-    { id: '4', account: 'hello', username: 'we', password: 'wearethechampions', remarks: 'Another test entry.' },
-];
+function DetailField({ label, value, onCopy, isRemark = false }: DetailFieldProps) {
+    return (
+        <Box>
+            <Typography variant="caption" color="text.secondary">{label}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography sx={{ flexGrow: 1, whiteSpace: isRemark ? 'pre-wrap' : 'normal' }}>{value}</Typography>
+                {!isRemark &&
+                    <IconButton size="small" onClick={() => onCopy(value)}>
+                        <ContentCopyIcon fontSize="small" />
+                    </IconButton>
+                }
+            </Box>
+        </Box>
+    );
+}
 
 
 export default function PasswordsPage() {
     const router = useRouter();
+    const { passwords } = usePasswords(); // Get passwords from the context
     const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | null>(null);
-    const [searchQuery, setSearchQuery] = useState(''); // State for the search query
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleOpenDialog = (password: PasswordEntry) => {
         setSelectedPassword(password);
@@ -42,23 +55,25 @@ export default function PasswordsPage() {
 
     const handleCopyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
+        // Optional: Add a snackbar here to show "Copied!"
     };
 
-    // Filter passwords based on the search query
-    const filteredPasswords = mockPasswords.filter(p => 
+    // Use the passwords from context for filtering
+    const filteredPasswords = passwords.filter(p => 
         p.account.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.username.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
         <Container>
+            {/* Search Box */}
             <Box sx={{ my: 2 }}>
                 <TextField 
                     fullWidth
                     variant="outlined"
                     placeholder="Search passwords..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)} // Update state on change
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -69,8 +84,8 @@ export default function PasswordsPage() {
                 />
             </Box>
 
+            {/* Password List */}
             <List>
-                {/* Map over the FILTERED list */}
                 {filteredPasswords.length > 0 ? (
                     filteredPasswords.map((p) => (
                         <ListItem key={p.id} disablePadding sx={{ mb: 1 }}>
@@ -84,7 +99,7 @@ export default function PasswordsPage() {
                     ))
                 ) : (
                     <Typography sx={{ textAlign: 'center', mt: 4, color: 'text.secondary' }}>
-                        No matching passwords found.
+                        {searchQuery ? "No matching passwords found." : "No passwords yet. Click '+' to add one!"}
                     </Typography>
                 )}
             </List>
@@ -126,29 +141,5 @@ export default function PasswordsPage() {
                 <AddIcon />
             </Fab>
         </Container>
-    );
-}
-
-// A helper component to avoid repetition in the dialog
-interface DetailFieldProps {
-    label: string;
-    value: string;
-    onCopy: (text: string) => void;
-    isRemark?: boolean;
-}
-
-function DetailField({ label, value, onCopy, isRemark = false }: DetailFieldProps) {
-    return (
-        <Box>
-            <Typography variant="caption" color="text.secondary">{label}</Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography sx={{ flexGrow: 1, whiteSpace: isRemark ? 'pre-wrap' : 'normal' }}>{value}</Typography>
-                {!isRemark &&
-                    <IconButton size="small" onClick={() => onCopy(value)}>
-                        <ContentCopyIcon fontSize="small" />
-                    </IconButton>
-                }
-            </Box>
-        </Box>
     );
 }

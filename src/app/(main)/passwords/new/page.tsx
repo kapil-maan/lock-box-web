@@ -1,32 +1,17 @@
- 'use client';
+'use client';
 
 import { Box, Button, Container, TextField, Typography, AppBar, Toolbar, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { usePasswords } from '@/contexts/PasswordContext'; // <-- Import our custom hook
+import { usePasswords } from '@/contexts/PasswordContext';
+import PasswordForm from '@/components/PasswordForm'; // <-- Import reusable form
 
 export default function NewPasswordPage() {
     const router = useRouter();
-    const { addPassword } = usePasswords(); // <-- Get the addPassword function from context
+    const { addPassword } = usePasswords();
 
-    // State for each form field
-    const [account, setAccount] = useState('');
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [remarks, setRemarks] = useState('');
-
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        if (!account) { // Simple validation
-            alert('Account Name is required.');
-            return;
-        }
-        
-        // Call the function from our context
-        addPassword({ account, username, password, remarks });
-
-        // Go back to the passwords list
+    const handleSubmit = (data: Omit<ReturnType<typeof usePasswords>['passwords'][0], 'id'>) => {
+        addPassword(data);
         router.push('/passwords');
     };
 
@@ -43,55 +28,7 @@ export default function NewPasswordPage() {
                 </Toolbar>
             </AppBar>
             <Container maxWidth="sm">
-                <Box
-                    component="form"
-                    onSubmit={handleSubmit} // <-- Add the submit handler
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 3,
-                        mt: 4
-                    }}
-                    noValidate
-                    autoComplete="off"
-                >
-                    <TextField 
-                        label="Account Name" 
-                        variant="outlined" 
-                        fullWidth 
-                        required
-                        value={account}
-                        onChange={(e) => setAccount(e.target.value)}
-                    />
-                    <TextField 
-                        label="User Name" 
-                        variant="outlined" 
-                        fullWidth 
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                    <TextField 
-                        label="Password" 
-                        type="password" 
-                        variant="outlined" 
-                        fullWidth 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <TextField 
-                        label="Remarks" 
-                        variant="outlined" 
-                        fullWidth 
-                        multiline 
-                        rows={4} 
-                        value={remarks}
-                        onChange={(e) => setRemarks(e.target.value)}
-                    />
-
-                    <Button type="submit" variant="contained" size="large" sx={{ mt: 2, py: 1.5 }}>
-                        Save
-                    </Button>
-                </Box>
+                <PasswordForm onSubmit={handleSubmit} />
             </Container>
         </>
     );

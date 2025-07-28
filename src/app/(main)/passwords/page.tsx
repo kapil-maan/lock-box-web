@@ -2,10 +2,24 @@
 
 import React, { useState } from 'react';
 import { 
-    Box, Container, Fab, List, ListItem, ListItemButton, ListItemText, Typography, 
-    TextField, InputAdornment, Dialog, DialogTitle, DialogContent, IconButton, 
-    Stack, DialogActions, Button 
-} from '@mui/material'; // <-- Container was missing here
+    Box, 
+    Container, 
+    Fab, 
+    List, 
+    ListItem, 
+    ListItemButton, 
+    ListItemText, 
+    Typography, 
+    TextField, 
+    InputAdornment, 
+    Dialog, 
+    DialogTitle, 
+    DialogContent, 
+    IconButton, 
+    Stack, 
+    DialogActions, 
+    Button 
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
@@ -14,7 +28,7 @@ import { useRouter } from 'next/navigation';
 import { usePasswords, PasswordEntry } from '@/contexts/PasswordContext';
 import { useSettings } from '@/contexts/SettingsContext';
 
-// DetailField component (remains the same)
+// Helper component for displaying fields in the dialog
 interface DetailFieldProps {
     label: string;
     value: string;
@@ -78,7 +92,6 @@ export default function PasswordsPage() {
         p.account.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.username.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
 
     return (
         <Container>
@@ -144,7 +157,18 @@ export default function PasswordsPage() {
                             Delete
                         </Button>
                     )}
-                    <Button onClick={() => { /* Edit later */ }} variant="contained">Edit</Button>
+                    <Button 
+                        onClick={() => {
+                            if (selectedPassword) {
+                                router.push(`/passwords/edit/${selectedPassword.id}`);
+                                handleCloseDialog();
+                            }
+                        }} 
+                        variant="contained" 
+                        autoFocus
+                    >
+                        Edit
+                    </Button>
                  </DialogActions>
             </Dialog>
 

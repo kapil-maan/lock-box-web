@@ -1,11 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Container, Typography, List, ListItem, ListItemButton, ListItemText, Switch, Button, Divider } from '@mui/material';
+import Link from 'next/link';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export default function SettingsPage() {
-    const [askPinEverytime, setAskPinEverytime] = useState(true);
-    const [allowDelete, setAllowDelete] = useState(false);
+    const { 
+        themeMode, 
+        toggleTheme, 
+        askPinEverytime, 
+        setAskPinEverytime, 
+        allowPasswordDelete, 
+        setAllowPasswordDelete 
+    } = useSettings();
 
     return (
         <Container maxWidth="sm" sx={{ mt: 4 }}>
@@ -15,42 +23,46 @@ export default function SettingsPage() {
             <List sx={{ bgcolor: 'background.paper', borderRadius: '8px', padding: 0 }}>
                 <ListItem>
                     <ListItemText primary="Use Dark Mode" />
-                    <Switch edge="end" checked={true} disabled />
+                    <Switch
+                        edge="end"
+                        onChange={toggleTheme}
+                        checked={themeMode === 'dark'}
+                    />
                 </ListItem>
                 <Divider component="li" />
                 <ListItem>
                     <ListItemText primary="Ask PIN everytime" />
                     <Switch
                         edge="end"
-                        onChange={() => setAskPinEverytime(!askPinEverytime)}
+                        onChange={(e) => setAskPinEverytime(e.target.checked)}
                         checked={askPinEverytime}
                     />
                 </ListItem>
                 <Divider component="li" />
                 <ListItem>
-                    <ListItemText primary="Allow password delete" />
+                    <ListItemText id="switch-list-label-allow-delete" primary="Allow password delete" />
                     <Switch
                         edge="end"
-                        onChange={() => setAllowDelete(!allowDelete)}
-                        checked={allowDelete}
+                        onChange={(e) => setAllowPasswordDelete(e.target.checked)}
+                        checked={allowPasswordDelete}
                     />
                 </ListItem>
                 <Divider component="li" />
-                {/* Corrected clickable list items below */}
+                {/* Updated to use Next.js Link for navigation */}
                 <ListItem disablePadding>
-                    <ListItemButton>
+                    <ListItemButton component={Link} href="/about">
                         <ListItemText primary="About this App" />
                     </ListItemButton>
                 </ListItem>
                 <Divider component="li" />
                 <ListItem disablePadding>
-                    <ListItemButton>
+                    <ListItemButton component={Link} href="/info">
                         <ListItemText primary="App's Info" />
                     </ListItemButton>
                 </ListItem>
                 <Divider component="li" />
                 <ListItem disablePadding>
-                    <ListItemButton>
+                    <ListItemButton component={Link} href="/privacy">
                         <ListItemText primary="Privacy Policy" />
                     </ListItemButton>
                 </ListItem>

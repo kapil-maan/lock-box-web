@@ -1,4 +1,3 @@
-// src/app/page.tsx
 'use client';
 
 import { Box, Button, Container, TextField, Typography } from '@mui/material';

@@ -1,4 +1,3 @@
-// src/app/(main)/passwords/page.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -14,7 +13,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useRouter } from 'next/navigation';
 import { usePasswords, PasswordEntry } from '@/contexts/PasswordContext';
 
-// Helper component to avoid repetition in the dialog
+// Helper component
 interface DetailFieldProps {
     label: string;
     value: string;
@@ -38,12 +37,12 @@ function DetailField({ label, value, onCopy, isRemark = false }: DetailFieldProp
     );
 }
 
-
 export default function PasswordsPage() {
     const router = useRouter();
-    const { passwords } = usePasswords(); // Get passwords from the context
+    const { passwords, deletePassword } = usePasswords(); // <-- Get deletePassword
     const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false); // State for confirm dialog
 
     const handleOpenDialog = (password: PasswordEntry) => {
         setSelectedPassword(password);
@@ -53,12 +52,27 @@ export default function PasswordsPage() {
         setSelectedPassword(null);
     };
 
-    const handleCopyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        // Optional: Add a snackbar here to show "Copied!"
+    const handleCopyToClipboard = async (text: string) => {
+        if (!navigator.clipboard) {
+            console.error('Clipboard API not available');
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
     };
 
-    // Use the passwords from context for filtering
+    // --- NEW DELETE HANDLER ---
+    const handleDeletePassword = () => {
+        if (selectedPassword) {
+            deletePassword(selectedPassword.id);
+            setDeleteConfirmOpen(false); // Close confirmation dialog
+            handleCloseDialog(); // Close details dialog
+        }
+    };
+
     const filteredPasswords = passwords.filter(p => 
         p.account.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.username.toLowerCase().includes(searchQuery.toLowerCase())
@@ -108,11 +122,7 @@ export default function PasswordsPage() {
             <Dialog open={!!selectedPassword} onClose={handleCloseDialog} fullWidth maxWidth="xs">
                 <DialogTitle>
                     Account Details
-                    <IconButton
-                        aria-label="close"
-                        onClick={handleCloseDialog}
-                        sx={{ position: 'absolute', right: 8, top: 8 }}
-                    >
+                    <IconButton aria-label="close" onClick={handleCloseDialog} sx={{ position: 'absolute', right: 8, top: 8 }}>
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
@@ -127,17 +137,31 @@ export default function PasswordsPage() {
                     )}
                 </DialogContent>
                  <DialogActions>
-                    <Button onClick={handleCloseDialog}>Delete</Button>
-                    <Button onClick={handleCloseDialog} variant="contained">Edit</Button>
+                    {/* Updated Delete button to open confirmation */}
+                    <Button onClick={() => setDeleteConfirmOpen(true)} color="error">Delete</Button>
+                    <Button onClick={() => { /* Edit functionality later */ }} variant="contained">Edit</Button>
                 </DialogActions>
             </Dialog>
 
-            <Fab 
-                color="primary" 
-                aria-label="add" 
-                sx={{ position: 'fixed', bottom: 80, right: 24 }}
-                onClick={() => router.push('/passwords/new')}
+            {/* --- NEW DELETE CONFIRMATION DIALOG --- */}
+            <Dialog
+                open={isDeleteConfirmOpen}
+                onClose={() => setDeleteConfirmOpen(false)}
             >
+                <DialogTitle>Are you sure?</DialogTitle>
+                <DialogContent>
+                    <Typography>Do you really want to delete this password entry? This action cannot be undone.</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+                    <Button onClick={handleDeletePassword} color="error" variant="contained">
+                        Confirm Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Floating Action Button */}
+            <Fab color="primary" aria-label="add" sx={{ position: 'fixed', bottom: 80, right: 24 }} onClick={() => router.push('/passwords/new')}>
                 <AddIcon />
             </Fab>
         </Container>

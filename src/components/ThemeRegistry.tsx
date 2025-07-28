@@ -1,4 +1,3 @@
-// src/components/ThemeRegistry.tsx
 'use client';
 
 import * as React from 'react';

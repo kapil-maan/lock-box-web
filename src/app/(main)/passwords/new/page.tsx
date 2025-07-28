@@ -1,5 +1,4 @@
-// src/app/(main)/passwords/new/page.tsx
-'use client';
+ 'use client';
 
 import { Box, Button, Container, TextField, Typography, AppBar, Toolbar, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';

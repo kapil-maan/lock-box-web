@@ -1,4 +1,3 @@
-// src/theme/EmotionCache.tsx
 'use client';
 import * as React from 'react';
 import createCache from '@emotion/cache';

@@ -1,4 +1,3 @@
-// src/app/passwords/layout.tsx
 'use client';
 
 import { Box, Paper } from '@mui/material';

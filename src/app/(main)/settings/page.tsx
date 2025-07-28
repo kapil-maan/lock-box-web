@@ -1,9 +1,11 @@
+// src/app/(main)/settings/page.tsx
 'use client';
 
 import React from 'react';
 import { Box, Container, Typography, List, ListItem, ListItemButton, ListItemText, Switch, Button, Divider } from '@mui/material';
 import Link from 'next/link';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SettingsPage() {
     const { 
@@ -14,6 +16,9 @@ export default function SettingsPage() {
         allowPasswordDelete, 
         setAllowPasswordDelete 
     } = useSettings();
+
+    const { logout } = useAuth(); // <-- Get the logout function
+
 
     return (
         <Container maxWidth="sm" sx={{ mt: 4 }}>
@@ -48,7 +53,6 @@ export default function SettingsPage() {
                     />
                 </ListItem>
                 <Divider component="li" />
-                {/* Updated to use Next.js Link for navigation */}
                 <ListItem disablePadding>
                     <ListItemButton component={Link} href="/about">
                         <ListItemText primary="About this App" />

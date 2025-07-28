@@ -5,15 +5,16 @@ import {
     Box, Container, Fab, List, ListItem, ListItemButton, ListItemText, Typography, 
     TextField, InputAdornment, Dialog, DialogTitle, DialogContent, IconButton, 
     Stack, DialogActions, Button 
-} from '@mui/material';
+} from '@mui/material'; // <-- Container was missing here
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useRouter } from 'next/navigation';
 import { usePasswords, PasswordEntry } from '@/contexts/PasswordContext';
+import { useSettings } from '@/contexts/SettingsContext';
 
-// Helper component
+// DetailField component (remains the same)
 interface DetailFieldProps {
     label: string;
     value: string;
@@ -39,10 +40,11 @@ function DetailField({ label, value, onCopy, isRemark = false }: DetailFieldProp
 
 export default function PasswordsPage() {
     const router = useRouter();
-    const { passwords, deletePassword } = usePasswords(); // <-- Get deletePassword
+    const { passwords, deletePassword } = usePasswords();
+    const { allowPasswordDelete } = useSettings();
     const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false); // State for confirm dialog
+    const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
     const handleOpenDialog = (password: PasswordEntry) => {
         setSelectedPassword(password);
@@ -51,7 +53,7 @@ export default function PasswordsPage() {
     const handleCloseDialog = () => {
         setSelectedPassword(null);
     };
-
+    
     const handleCopyToClipboard = async (text: string) => {
         if (!navigator.clipboard) {
             console.error('Clipboard API not available');
@@ -63,13 +65,12 @@ export default function PasswordsPage() {
             console.error('Failed to copy: ', err);
         }
     };
-
-    // --- NEW DELETE HANDLER ---
+    
     const handleDeletePassword = () => {
         if (selectedPassword) {
             deletePassword(selectedPassword.id);
-            setDeleteConfirmOpen(false); // Close confirmation dialog
-            handleCloseDialog(); // Close details dialog
+            setDeleteConfirmOpen(false);
+            handleCloseDialog(); 
         }
     };
 
@@ -77,6 +78,7 @@ export default function PasswordsPage() {
         p.account.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.username.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
 
     return (
         <Container>
@@ -97,7 +99,7 @@ export default function PasswordsPage() {
                     }}
                 />
             </Box>
-
+            
             {/* Password List */}
             <List>
                 {filteredPasswords.length > 0 ? (
@@ -137,13 +139,16 @@ export default function PasswordsPage() {
                     )}
                 </DialogContent>
                  <DialogActions>
-                    {/* Updated Delete button to open confirmation */}
-                    <Button onClick={() => setDeleteConfirmOpen(true)} color="error">Delete</Button>
-                    <Button onClick={() => { /* Edit functionality later */ }} variant="contained">Edit</Button>
-                </DialogActions>
+                    {allowPasswordDelete && (
+                        <Button onClick={() => setDeleteConfirmOpen(true)} color="error">
+                            Delete
+                        </Button>
+                    )}
+                    <Button onClick={() => { /* Edit later */ }} variant="contained">Edit</Button>
+                 </DialogActions>
             </Dialog>
 
-            {/* --- NEW DELETE CONFIRMATION DIALOG --- */}
+            {/* Delete Confirmation Dialog */}
             <Dialog
                 open={isDeleteConfirmOpen}
                 onClose={() => setDeleteConfirmOpen(false)}

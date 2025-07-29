@@ -2,7 +2,7 @@
 
 import { Box, Button, TextField } from "@mui/material";
 import React, { useState, useEffect } from "react";
-import { PasswordEntry } from "@/contexts/PasswordContext";
+import { PasswordEntry } from "@/contexts/AuthContext";
 
 type FormData = Omit<PasswordEntry, 'id'>;
 

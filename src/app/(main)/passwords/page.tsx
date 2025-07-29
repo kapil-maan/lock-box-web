@@ -18,7 +18,8 @@ import {
     IconButton, 
     Stack, 
     DialogActions, 
-    Button 
+    Button, 
+    ListItemAvatar
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
@@ -27,6 +28,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useRouter } from 'next/navigation';
 import { useAuth, PasswordEntry } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
+import LetterAvatar from '@/components/LetterAvatar';
 
 // Helper component for displaying fields in the dialog
 interface DetailFieldProps {
@@ -119,9 +121,12 @@ export default function PasswordsPage() {
                     filteredPasswords.map((p) => (
                         <ListItem key={p.id} disablePadding sx={{ mb: 1 }}>
                             <ListItemButton onClick={() => handleOpenDialog(p)} sx={{ bgcolor: 'background.paper', borderRadius: '8px' }}>
+                                <ListItemAvatar>
+                                    <LetterAvatar name={p.account} />
+                                </ListItemAvatar>
                                 <ListItemText 
-                                    primary={<Typography variant="h6">{p.account}</Typography>} 
-                                    secondary={p.username} 
+                                    primary={<Typography noWrap variant="h6">{p.account}</Typography>} 
+                                    secondary={<Typography noWrap variant="body2">{p.username}</Typography>}
                                 />
                             </ListItemButton>
                         </ListItem>

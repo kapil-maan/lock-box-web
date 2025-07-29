@@ -25,7 +25,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useRouter } from 'next/navigation';
-import { usePasswords, PasswordEntry } from '@/contexts/PasswordContext';
+import { useAuth, PasswordEntry } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
 
 // Helper component for displaying fields in the dialog
@@ -54,7 +54,7 @@ function DetailField({ label, value, onCopy, isRemark = false }: DetailFieldProp
 
 export default function PasswordsPage() {
     const router = useRouter();
-    const { passwords, deletePassword } = usePasswords();
+    const { passwords, deletePassword } = useAuth();
     const { allowPasswordDelete } = useSettings();
     const [selectedPassword, setSelectedPassword] = useState<PasswordEntry | null>(null);
     const [searchQuery, setSearchQuery] = useState('');

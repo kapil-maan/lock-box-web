@@ -3,12 +3,12 @@
 import { Box, Button, Container, TextField, Typography, AppBar, Toolbar, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'next/navigation';
-import { usePasswords } from '@/contexts/PasswordContext';
+import { useAuth } from '@/contexts/AuthContext';
 import PasswordForm from '@/components/PasswordForm'; // <-- Import reusable form
 
 export default function NewPasswordPage() {
     const router = useRouter();
-    const { addPassword } = usePasswords();
+    const { addPassword } = useAuth();
 
     const handleSubmit = (data: Omit<ReturnType<typeof usePasswords>['passwords'][0], 'id'>) => {
         addPassword(data);

@@ -1,11 +1,10 @@
-// src/app/(main)/settings/page.tsx
 'use client';
 
 import React from 'react';
 import { Box, Container, Typography, List, ListItem, ListItemButton, ListItemText, Switch, Button, Divider } from '@mui/material';
 import Link from 'next/link';
 import { useSettings } from '@/contexts/SettingsContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext'; // We still need useAuth
 
 export default function SettingsPage() {
     const { 
@@ -16,9 +15,10 @@ export default function SettingsPage() {
         allowPasswordDelete, 
         setAllowPasswordDelete 
     } = useSettings();
-
-    const { logout } = useAuth(); // <-- Get the logout function
-
+    
+    // --- THIS IS THE FIX ---
+    // We get the whole auth object instead of just the logout function.
+    const auth = useAuth();
 
     return (
         <Container maxWidth="sm" sx={{ mt: 4 }}>
@@ -26,6 +26,7 @@ export default function SettingsPage() {
                 Settings
             </Typography>
             <List sx={{ bgcolor: 'background.paper', borderRadius: '8px', padding: 0 }}>
+                {/* ... The ListItems for settings remain the same ... */}
                 <ListItem>
                     <ListItemText primary="Use Dark Mode" />
                     <Switch
@@ -72,7 +73,8 @@ export default function SettingsPage() {
                 </ListItem>
             </List>
             <Box sx={{ mt: 4, textAlign: 'center' }}>
-                <Button variant="outlined" color="primary" sx={{ width: '100%', py: 1.5 }}>
+                {/* We now call auth.logout() directly */}
+                <Button onClick={() => auth.logout()} variant="outlined" color="primary" sx={{ width: '100%', py: 1.5 }}>
                     Logout
                 </Button>
             </Box>

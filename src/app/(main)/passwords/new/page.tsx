@@ -1,16 +1,17 @@
 'use client';
 
-import { Box, Button, Container, TextField, Typography, AppBar, Toolbar, IconButton } from '@mui/material';
+import { Container, Typography, AppBar, Toolbar, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import PasswordForm from '@/components/PasswordForm'; // <-- Import reusable form
+import { useAuth, PasswordEntry } from '@/contexts/AuthContext';
+import PasswordForm from '@/components/PasswordForm';
 
 export default function NewPasswordPage() {
     const router = useRouter();
     const { addPassword } = useAuth();
 
-    const handleSubmit = (data: Omit<ReturnType<typeof usePasswords>['passwords'][0], 'id'>) => {
+    // The type for 'data' is now much cleaner
+    const handleSubmit = (data: Omit<PasswordEntry, 'id'>) => {
         addPassword(data);
         router.push('/passwords');
     };

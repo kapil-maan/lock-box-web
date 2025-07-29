@@ -1,15 +1,14 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import * as bcrypt from 'bcryptjs';
 import CryptoJS from 'crypto-js';
 import { v4 as uuidv4 } from 'uuid';
 import { useSettings } from './SettingsContext';
 
-// Define keys for storage
 const MASTER_PASSWORD_KEY = 'masterPasswordHash';
 const PASSWORDS_STORAGE_KEY = 'lockBoxPasswords';
-const SESSION_KEY = 'lockBoxSessionKey'; // For sessionStorage
+const SESSION_KEY = 'lockBoxSessionKey';
 
 export type PasswordEntry = {
     id: string;
@@ -39,49 +38,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [passwords, setPasswords] = useState<PasswordEntry[]>([]);
     const settings = useSettings();
 
-    // This effect now ONLY checks for a master password's existence on initial load.
-    useEffect(() => {
-        const hash = localStorage.getItem(MASTER_PASSWORD_KEY);
-        setIsPasswordSet(!!hash);
-    }, []);
-    
-    // This new effect attempts to auto-login from the session key when the app loads.
-    useEffect(() => {
-        // This check prevents the effect from running until the settings have loaded.
-        if (settings) {
-            const sessionKey = sessionStorage.getItem(SESSION_KEY);
-            // If there's a key and the setting is off, try to log in with it.
-            if (sessionKey && !settings.askPinEverytime && !isUnlocked) {
-                login(sessionKey);
-            }
-        }
-    }, [settings]); // Re-run when settings are loaded
+    // --- FUNCTION DEFINITIONS MOVED UP AND WRAPPED IN useCallback ---
 
-    // This effect encrypts and saves the password list whenever it changes.
-    useEffect(() => {
-        if (isUnlocked && masterKey) {
-            try {
-                const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(passwords), masterKey).toString();
-                localStorage.setItem(PASSWORDS_STORAGE_KEY, encryptedData);
-            } catch (error) {
-                console.error("Failed to encrypt and save passwords", error);
-            }
-        }
-    }, [passwords, isUnlocked, masterKey]);
-
-    const login = async (password: string): Promise<boolean> => {
+    const login = useCallback(async (password: string): Promise<boolean> => {
         const hash = localStorage.getItem(MASTER_PASSWORD_KEY);
 
         const handleSuccessfulLogin = (plainTextPassword: string) => {
-            setMasterKey(plainTextPassword); // Hold the key in state
+            setMasterKey(plainTextPassword);
             setIsUnlocked(true);
             
-            // If "Ask PIN everytime" is OFF, save the master password to sessionStorage.
             if (settings && !settings.askPinEverytime) {
                 sessionStorage.setItem(SESSION_KEY, plainTextPassword);
             }
             
-            // Decrypt and load the password list
             try {
                 const encryptedData = localStorage.getItem(PASSWORDS_STORAGE_KEY);
                 if (encryptedData) {
@@ -95,33 +64,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         };
 
-        if (hash) { // Returning user
+        if (hash) {
             const isMatch = await bcrypt.compare(password, hash);
             if (isMatch) {
                 handleSuccessfulLogin(password);
                 return true;
             }
             return false;
-        } else { // First-time user
+        } else {
             const newHash = await bcrypt.hash(password, 10);
             localStorage.setItem(MASTER_PASSWORD_KEY, newHash);
             setIsPasswordSet(true);
             handleSuccessfulLogin(password);
             return true;
         }
-    };
+    }, [settings]); // login depends on settings
 
-    const logout = () => {
+    const logout = useCallback(() => {
         setIsUnlocked(false);
         setMasterKey(null);
         setPasswords([]);
-        sessionStorage.removeItem(SESSION_KEY); // Clear the session key on logout
-    };
+        sessionStorage.removeItem(SESSION_KEY);
+    }, []); // logout has no dependencies
 
-    // --- Password modification functions ---
+    // --- useEffect HOOKS NOW COME AFTER FUNCTION DEFINITIONS ---
+
+    useEffect(() => {
+        const hash = localStorage.getItem(MASTER_PASSWORD_KEY);
+        setIsPasswordSet(!!hash);
+    }, []);
+    
+    useEffect(() => {
+        if (settings) {
+            const sessionKey = sessionStorage.getItem(SESSION_KEY);
+            if (sessionKey && !settings.askPinEverytime && !isUnlocked) {
+                login(sessionKey);
+            }
+        }
+    }, [settings, isUnlocked, login]);
+
+    useEffect(() => {
+        if (isUnlocked && masterKey) {
+            try {
+                const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(passwords), masterKey).toString();
+                localStorage.setItem(PASSWORDS_STORAGE_KEY, encryptedData);
+            } catch (error) {
+                console.error("Failed to encrypt and save passwords", error);
+            }
+        }
+    }, [passwords, isUnlocked, masterKey]);
+
     const addPassword = (data: Omit<PasswordEntry, 'id'>) => {
-        setPasswords(current => [newPassword, ...current]);
         const newPassword = { id: uuidv4(), ...data };
+        setPasswords(current => [newPassword, ...current]);
     };
     const deletePassword = (id: string) => {
         setPasswords(current => current.filter(p => p.id !== id));

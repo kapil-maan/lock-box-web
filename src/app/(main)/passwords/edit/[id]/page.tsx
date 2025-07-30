@@ -6,6 +6,12 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth, PasswordEntry } from "@/contexts/AuthContext";
 import PasswordForm from "@/components/PasswordForm";
 
+// This new function tells Next.js how to handle this dynamic page during a static build.
+// By returning an empty array, we are saying "don't pre-build any pages, this route is fully dynamic".
+export async function generateStaticParams() {
+  return [];
+}
+
 export default function EditPasswordPage() {
     const router = useRouter();
     const params = useParams();
@@ -14,7 +20,6 @@ export default function EditPasswordPage() {
     const id = Array.isArray(params.id) ? params.id[0] : params.id;
     const passwordToEdit = passwords.find(p => p.id === id);
 
-    // Use the explicit PasswordEntry type here
     const handleUpdate = (data: Omit<PasswordEntry, 'id'>) => {
         if (id) {
             updatePassword(id, data);

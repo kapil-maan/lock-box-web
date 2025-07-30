@@ -115,8 +115,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, [passwords, isUnlocked, masterKey]);
 
     const addPassword = (data: Omit<PasswordEntry, 'id'>) => {
-        const newPassword = { id: uuidv4(), ...data };
         setPasswords(current => [newPassword, ...current]);
+        const newPassword = { id: uuidv4(), ...data };
     };
     const deletePassword = (id: string) => {
         setPasswords(current => current.filter(p => p.id !== id));

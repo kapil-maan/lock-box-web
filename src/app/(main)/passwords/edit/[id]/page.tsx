@@ -3,7 +3,7 @@
 import { Container, Typography, AppBar, Toolbar, IconButton } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter, useParams } from 'next/navigation';
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, PasswordEntry } from "@/contexts/AuthContext";
 import PasswordForm from "@/components/PasswordForm";
 
 export default function EditPasswordPage() {
@@ -14,7 +14,8 @@ export default function EditPasswordPage() {
     const id = Array.isArray(params.id) ? params.id[0] : params.id;
     const passwordToEdit = passwords.find(p => p.id === id);
 
-    const handleUpdate = (data: Omit<typeof passwordToEdit, 'id'>) => {
+    // Use the explicit PasswordEntry type here
+    const handleUpdate = (data: Omit<PasswordEntry, 'id'>) => {
         if (id) {
             updatePassword(id, data);
             router.push('/passwords');
